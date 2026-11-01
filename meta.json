@@ -1,0 +1,12 @@
+{
+  "name": "Artifact Deployer",
+  "summary": "Copy workspace files into a target directory tree with Ant includes and excludes, flatten, clear-first and no-overwrite, verifying every file after the copy.",
+  "author": "hummerstudio",
+  "license": "MIT",
+  "tags": [
+    "official-port",
+    "artifact",
+    "deploy"
+  ],
+  "homepage": "https://github.com/hummerstudio/jenkins-atom-artifact-deployer"
+}

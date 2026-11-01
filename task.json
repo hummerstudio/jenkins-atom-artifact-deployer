@@ -1,0 +1,93 @@
+{
+  "atomCode": "artifact-deployer",
+  "name": "制品部署到目录",
+  "version": "1.0.0",
+  "description": "把匹配 Ant 模式的文件复制到目标目录树，目标可在工作区之外。flatten、清空目标、已有不覆盖、保留 mtime，每个文件复制后回读校验。",
+  "execution": {
+    "packagePath": "artifact-deployer.jar",
+    "language": "java",
+    "target": "$atom_java_path -cp artifact-deployer.jar com.jenkinschina.atom.sdk.AtomRunner"
+  },
+  "input": {
+    "includes": {
+      "label": "要部署的文件，Ant 模式，逗号分隔，默认全部",
+      "type": "vuex-input",
+      "default": "**"
+    },
+    "basedir": {
+      "label": "起始目录，相对工作区，留空即根",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "excludes": {
+      "label": "排除，Ant 模式，可留空",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "remote": {
+      "label": "目标目录，绝对或相对工作区",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "flatten": {
+      "label": "去掉目录层级，只按文件名放",
+      "type": "vuex-input",
+      "default": "false"
+    },
+    "deleteRemote": {
+      "label": "复制前清空目标目录内容",
+      "type": "vuex-input",
+      "default": "false"
+    },
+    "failNoFilesDeploy": {
+      "label": "没匹配到文件就失败，插件默认不勾",
+      "type": "vuex-input",
+      "default": "true"
+    },
+    "dryRun": {
+      "label": "只列出会复制什么，不写盘",
+      "type": "vuex-input",
+      "default": "false"
+    }
+  },
+  "output": {
+    "deployed": {
+      "type": "string",
+      "description": "结果条目数，复制成功加已存在被保留"
+    },
+    "copied": {
+      "type": "string",
+      "description": "真正写下去的文件数"
+    },
+    "skipped": {
+      "type": "string",
+      "description": "目标已存在、没有覆盖的文件数"
+    },
+    "matched": {
+      "type": "string",
+      "description": "模式匹配到的文件数"
+    },
+    "bytes": {
+      "type": "string",
+      "description": "写下去的字节数"
+    },
+    "remotePath": {
+      "type": "string",
+      "description": "解析后的目标绝对路径"
+    },
+    "files": {
+      "type": "string",
+      "description": "每个文件的目标路径与大小，JSON 数组"
+    },
+    "dryRun": {
+      "type": "string",
+      "description": "true 表示只列出没写盘"
+    }
+  },
+  "x-jenkins": {
+    "protocol": "jenkins-1",
+    "requires": {
+      "runner": ">=0.4.0"
+    }
+  }
+}
