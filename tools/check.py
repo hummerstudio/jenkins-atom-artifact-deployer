@@ -47,7 +47,7 @@ def base_input(**overrides):
     return data
 
 
-def run(overrides, workspace, timeout=120, env_extra=None, drop=()):
+def run(overrides, workspace, timeout=120, env_extra=None, drop=(), cwd=None):
     directory = tempfile.mkdtemp(prefix="deployer-check-")
     data = base_input(**overrides)
     for name in drop:
@@ -59,7 +59,8 @@ def run(overrides, workspace, timeout=120, env_extra=None, drop=()):
     env.update({"atom_data_dir": directory, "atom_data_input": "input.json", "atom_data_output": "output.json",
                 "atom_workspace": workspace})
     env.update(env_extra or {})
-    proc = subprocess.run([JAVA, "-cp", JAR, "com.jenkinschina.atom.sdk.AtomRunner"], cwd=workspace, env=env,
+    # cwd is deliberately not the workspace by default in the relative-path check; elsewhere they coincide
+    proc = subprocess.run([JAVA, "-cp", JAR, "com.jenkinschina.atom.sdk.AtomRunner"], cwd=cwd or workspace, env=env,
                           capture_output=True, text=True, timeout=timeout)
     out = os.path.join(directory, "output.json")
     result = json.load(open(out, encoding="utf-8")) if os.path.exists(out) else {}
@@ -316,10 +317,14 @@ def _():
 def _():
     workspace = fresh_workspace()
     sample_tree(workspace)
-    result, values, _proc = run({"remote": "out/release", "includes": "*.jar"}, workspace)
+    # the atom is started from an unrelated directory: a relative remote must resolve against the workspace,
+    # not against the process working directory (on a CI runner the two are often the same, which hides the bug)
+    elsewhere = tempfile.mkdtemp(prefix="deployer-cwd-")
+    result, values, _proc = run({"remote": "out/release", "includes": "*.jar"}, workspace, cwd=elsewhere)
     assert result.get("status") == "success", result.get("message")
     assert values["remotePath"] == os.path.join(workspace, "out", "release"), values["remotePath"]
     assert set(tree_of(os.path.join(workspace, "out", "release"))[0]) == {"app.jar"}
+    assert not os.path.exists(os.path.join(elsewhere, "out")), "a relative remote was resolved against the cwd"
 
 
 @check("remote.outside.workspace")
